@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo mayorista</title>
+<meta name="description" content="Venta mayorista de perfuminas y desodorantes de piso. Pedidos por WhatsApp.">
+<style>
+:root{
+  --bg:#f6f8f7; --card:#ffffff; --text:#1d2a26; --muted:#5d6e68; --line:#e2e8e5;
+  --brand:#2e7d6b; --brand-ink:#ffffff; --accent:#e8f3ef; --wa:#1fa855;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#121816; --card:#1b2421; --text:#e6eeeb; --muted:#9fb1aa; --line:#2b3733;
+         --brand:#4fb39a; --brand-ink:#0d1714; --accent:#20302b; --wa:#25c062; }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.45}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header{background:var(--brand);color:var(--brand-ink);padding:28px 0 22px}
+header h1{margin:0 0 4px;font-size:1.7rem}
+header p{margin:0;opacity:.9}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+.info div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.info b{display:block;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit}
+.chip.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+h2{font-size:1.15rem;margin:22px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;scroll-margin-top:16px}
+.card.hl{outline:3px solid var(--brand)}
+.ph{aspect-ratio:1/1;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:3.2rem}
+.ph img{width:100%;height:100%;object-fit:cover}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.title{font-weight:600}
+.price{font-size:1.25rem;font-weight:700}
+.price small{font-size:.8rem;font-weight:400;color:var(--muted)}
+.min{font-size:.85rem;color:var(--muted)}
+label{font-size:.8rem;color:var(--muted)}
+select,input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+.row{display:grid;grid-template-columns:1fr 90px;gap:8px}
+.btn{border:0;border-radius:10px;padding:10px 12px;font:inherit;font-weight:600;cursor:pointer;background:var(--brand);color:var(--brand-ink);margin-top:auto}
+.cartbar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 0;margin-top:24px;display:none}
+.cartbar.show{display:block}
+.cartbar .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cartlist{font-size:.9rem;color:var(--muted);flex:1;min-width:200px}
+.cartlist button{border:0;background:none;color:var(--muted);cursor:pointer;font:inherit;text-decoration:underline;padding:0 4px}
+.wa{background:var(--wa);color:#fff;text-decoration:none;border-radius:10px;padding:12px 16px;font-weight:700;white-space:nowrap}
+footer{color:var(--muted);font-size:.85rem;text-align:center;padding:28px 0 40px}
+.msg{color:var(--muted);padding:20px 0}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1 id="nombre">Catálogo mayorista</h1>
+  <p>Perfuminas y desodorantes de piso · venta por mayor</p>
+</div></header>
+
+<main class="wrap">
+  <section class="info" id="info"></section>
+  <nav class="filters" id="filters"></nav>
+  <div id="catalogo"><p class="msg">Cargando productos…</p></div>
+</main>
+
+<div class="cartbar" id="cartbar"><div class="wrap">
+  <div class="cartlist" id="cartlist"></div>
+  <a class="wa" id="cartsend" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+</div></div>
+
+<footer class="wrap">Precios mayoristas sujetos a disponibilidad. Te confirmamos el total por WhatsApp.</footer>
+
+<script>
+/* ===== CONFIGURACIÓN =====
+   Pegá acá los links "Publicar en la Web → CSV" de cada pestaña de la Google Sheet.
+   Si quedan vacíos, la página muestra los datos de ejemplo de abajo. */
+const CSV_PRODUCTOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=0";
+const CSV_NEGOCIO   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=437297188";
+
+const EJEMPLO_PRODUCTOS = `Categoría,Producto,Aromas,Presentación,Precio,Mínimo,Disponible
+Perfuminas,Perfumina textil,"Lavanda, Bebé, Floral",500 ml,2500,6,Sí
+Perfuminas,Perfumina textil,"Lavanda, Bebé, Floral",1 L,4200,6,Sí
+Desodorantes de piso,Desodorante concentrado,"Pino, Marina, Lavanda",1 L,1800,6,Sí
+Desodorantes de piso,Desodorante concentrado,"Pino, Marina, Lavanda",5 L,6000,2,No`;
+const EJEMPLO_NEGOCIO = `Dato,Valor
+Nombre del emprendimiento,[Nombre]
+WhatsApp (549 + área sin 0 + número sin 15),5491100000000
+Envíos,[Envíos a CABA y GBA / retiro en ...]
+Medios de pago,"[Transferencia, efectivo, Mercado Pago]"
+Horario de atención,[Lunes a viernes de 9 a 18]
+Cómo hacer el pedido,"Elegí aroma y cantidad, agregá al pedido y mandalo por WhatsApp"`;
+
+const EMOJI = {"Perfuminas":"🌸","Desodorantes de piso":"🧽"};
+
+/* ===== CSV ===== */
+function parseCSV(text){
+  const rows=[];let row=[],cur="",q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c=='"'){ if(text[i+1]=='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+    else if(c=='"') q=true;
+    else if(c==','){row.push(cur);cur="";}
+    else if(c=='\n'||c=='\r'){ if(c=='\r'&&text[i+1]=='\n')i++; row.push(cur);rows.push(row);row=[];cur=""; }
+    else cur+=c;
+  }
+  if(cur!==""||row.length){row.push(cur);rows.push(row);}
+  const head=rows.shift().map(h=>h.trim());
+  return rows.filter(r=>r.some(v=>v.trim())).map(r=>Object.fromEntries(head.map((h,i)=>[h,(r[i]||"").trim()])));
+}
+async function load(url,fallback){
+  if(!url) return parseCSV(fallback);
+  const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw new Error(r.status);
+  return parseCSV(await r.text());
+}
+
+/* ===== Helpers ===== */
+const num=s=>Number(String(s).replace(/[^\d]/g,""))||0;
+const ars=n=>"$"+n.toLocaleString("es-AR");
+/* Debe coincidir EXACTO con la fórmula de la pestaña Meta */
+const slug=s=>s.toLowerCase().replace(/[áàä]/g,"a").replace(/[éèë]/g,"e").replace(/[íìï]/g,"i").replace(/[óòö]/g,"o").replace(/[úùü]/g,"u").replace(/ñ/g,"n").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const si=s=>/^s[ií]/i.test(s);
+
+let WA="", cart=[];
+
+function render(productos, negocio){
+  const get=k=>(negocio.find(d=>d.Dato.toLowerCase().startsWith(k))||{}).Valor||"";
+  const nombre=get("nombre"); WA=get("whatsapp").replace(/\D/g,"");
+  if(nombre && !nombre.startsWith("[")){ document.getElementById("nombre").textContent=nombre; document.title=nombre+" · Catálogo mayorista"; }
+  document.getElementById("info").innerHTML=[["Cómo pedir",get("cómo")||get("como")],["Envíos",get("envíos")||get("envios")],["Medios de pago",get("medios")],["Horario",get("horario")]]
+    .filter(x=>x[1]).map(([t,v])=>`<div><b>${t}</b>${esc(v)}</div>`).join("");
+
+  const items=productos.filter(p=>si(p["Disponible"])&&p["Producto"]);
+  const cats=[...new Set(items.map(p=>p["Categoría"]))];
+  const f=document.getElementById("filters");
+  f.innerHTML=["Todos",...cats].map((c,i)=>`<button class="chip${i?"":" on"}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+  f.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;
+    f.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));
+    document.querySelectorAll("[data-cat]").forEach(s=>s.hidden=!(b.dataset.c==="Todos"||s.dataset.cat===b.dataset.c));};
+
+  document.getElementById("catalogo").innerHTML = items.length ? cats.map(cat=>`
+    <section data-cat="${esc(cat)}"><h2>${EMOJI[cat]||"🧴"} ${esc(cat)}</h2><div class="grid">
+    ${items.filter(p=>p["Categoría"]===cat).map(p=>{
+      const id=slug(p["Producto"]+" "+p["Presentación"]); const min=num(p["Mínimo"])||1;
+      const aromas=p["Aromas"].split(",").map(a=>a.trim()).filter(Boolean);
+      return `<article class="card" id="${id}">
+        <div class="ph" data-e="${EMOJI[cat]||"🧴"}"><img src="fotos/${id}.jpg" alt="${esc(p["Producto"])}" loading="lazy" onerror="this.parentNode.textContent=this.parentNode.dataset.e"></div>
+        <div class="body">
+          <div class="title">${esc(p["Producto"])} · ${esc(p["Presentación"])}</div>
+          <div class="price">${ars(num(p["Precio"]))} <small>c/u</small></div>
+          <div class="min">Mínimo ${min} unidades</div>
+          <div class="row">
+            <div><label>Aroma</label><select>${aromas.length?aromas.map(a=>`<option>${esc(a)}</option>`).join(""):"<option>Único</option>"}</select></div>
+            <div><label>Cantidad</label><input type="number" min="${min}" step="1" value="${min}"></div>
+          </div>
+          <button class="btn" data-n="${esc(p["Producto"]+" "+p["Presentación"])}" data-p="${num(p["Precio"])}" data-min="${min}">Agregar al pedido</button>
+        </div></article>`;}).join("")}
+    </div></section>`).join("") : `<p class="msg">No hay productos disponibles por ahora.</p>`;
+
+  const want=new URLSearchParams(location.search).get("p")||location.hash.slice(1);
+  const el=want&&document.getElementById(want); if(el){el.classList.add("hl");el.scrollIntoView({block:"center"});}
+
+  document.getElementById("catalogo").onclick=e=>{
+    const b=e.target.closest(".btn"); if(!b) return;
+    const card=b.closest(".card"); const aroma=card.querySelector("select").value;
+    const qty=Math.max(num(card.querySelector("input").value), Number(b.dataset.min));
+    card.querySelector("input").value=qty;
+    const ex=cart.find(c=>c.n===b.dataset.n&&c.a===aroma);
+    ex?ex.q+=qty:cart.push({n:b.dataset.n,a:aroma,q:qty,p:Number(b.dataset.p)});
+    b.textContent="✓ Agregado"; setTimeout(()=>b.textContent="Agregar al pedido",1200);
+    drawCart();
+  };
+}
+
+function drawCart(){
+  const bar=document.getElementById("cartbar"); bar.classList.toggle("show",cart.length>0);
+  const total=cart.reduce((s,c)=>s+c.q*c.p,0);
+  document.getElementById("cartlist").innerHTML=cart.map((c,i)=>`${c.q} × ${esc(c.n)} (${esc(c.a)}) <button data-i="${i}" aria-label="Quitar">quitar</button>`).join("<br>")+`<br><b>Total estimado: ${ars(total)}</b>`;
+  const txt="¡Hola! Quiero hacer este pedido:\n"+cart.map(c=>`• ${c.q} × ${c.n} – ${c.a}`).join("\n")+`\n\nTotal estimado: ${ars(total)}`;
+  document.getElementById("cartsend").href=`https://wa.me/${WA}?text=${encodeURIComponent(txt)}`;
+}
+document.getElementById("cartlist").onclick=e=>{const b=e.target.closest("button[data-i]");if(b){cart.splice(Number(b.dataset.i),1);drawCart();}};
+
+Promise.all([load(CSV_PRODUCTOS,EJEMPLO_PRODUCTOS),load(CSV_NEGOCIO,EJEMPLO_NEGOCIO)])
+  .then(([p,n])=>render(p,n))
+  .catch(()=>{document.getElementById("catalogo").innerHTML='<p class="msg">No se pudo cargar el catálogo. Escribinos por WhatsApp.</p>';});
+</script>
+</body>
+</html>
