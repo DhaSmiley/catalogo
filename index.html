@@ -2,77 +2,143 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Catálogo mayorista</title>
 <meta name="description" content="Venta mayorista de perfuminas y desodorantes de piso. Pedidos por WhatsApp.">
+<meta name="theme-color" content="#2f8f7a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f6f8f7; --card:#ffffff; --text:#1d2a26; --muted:#5d6e68; --line:#e2e8e5;
-  --brand:#2e7d6b; --brand-ink:#ffffff; --accent:#e8f3ef; --wa:#1fa855;
+  --bg:#f5f7f6; --card:#ffffff; --text:#1c2b27; --muted:#66776f; --line:#e4ebe8;
+  --brand:#2f8f7a; --brand-2:#57b89f; --brand-soft:#e3f3ee; --ink-on-brand:#ffffff;
+  --lila:#efe7f7; --wa:#1fa855; --shadow:0 6px 20px rgba(28,43,39,.08);
+  --r:18px;
 }
 @media (prefers-color-scheme: dark){
-  :root{ --bg:#121816; --card:#1b2421; --text:#e6eeeb; --muted:#9fb1aa; --line:#2b3733;
-         --brand:#4fb39a; --brand-ink:#0d1714; --accent:#20302b; --wa:#25c062; }
+  :root{ --bg:#101614; --card:#18211e; --text:#e8efec; --muted:#9db0a8; --line:#26322e;
+         --brand:#4fb39a; --brand-2:#6fcab2; --brand-soft:#1d2d28; --ink-on-brand:#0c1512;
+         --lila:#251f2c; --shadow:0 6px 20px rgba(0,0,0,.35); }
 }
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.45}
-.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
-header{background:var(--brand);color:var(--brand-ink);padding:28px 0 22px}
-header h1{margin:0 0 4px;font-size:1.7rem}
-header p{margin:0;opacity:.9}
-.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
-.info div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-.info b{display:block;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
-.chip{border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit}
-.chip.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
-h2{font-size:1.15rem;margin:22px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;scroll-margin-top:16px}
-.card.hl{outline:3px solid var(--brand)}
-.ph{aspect-ratio:1/1;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:3.2rem}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.4;padding-bottom:110px}
+button{font:inherit;color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+
+/* ---------- Header ---------- */
+header{background:linear-gradient(140deg,var(--brand) 0%,var(--brand-2) 100%);color:var(--ink-on-brand);
+  padding:calc(22px + env(safe-area-inset-top)) 0 54px;border-radius:0 0 28px 28px;position:relative;overflow:hidden}
+header::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.12)}
+header::before{content:"";position:absolute;left:-40px;bottom:-80px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+header .wrap{position:relative;z-index:1}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);padding:5px 12px;border-radius:999px;font-size:.78rem;font-weight:700;letter-spacing:.02em}
+header h1{margin:12px 0 4px;font-size:1.9rem;font-weight:800;line-height:1.1}
+header p{margin:0;opacity:.92;font-size:1rem}
+
+/* ---------- Info ---------- */
+.info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:-34px 0 18px;position:relative;z-index:1}
+.info div{background:var(--card);border-radius:16px;padding:12px 13px;box-shadow:var(--shadow);font-size:.86rem;color:var(--muted)}
+.info b{display:flex;align-items:center;gap:6px;color:var(--text);font-size:.9rem;margin-bottom:3px}
+.info .wide{grid-column:1/-1}
+
+/* ---------- Filtros ---------- */
+.filters{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 16px;margin:0 -16px 6px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--card);padding:9px 16px;border-radius:999px;cursor:pointer;font-weight:700;font-size:.9rem;white-space:nowrap}
+.chip.on{background:var(--text);border-color:var(--text);color:var(--bg)}
+
+h2{font-size:1.15rem;font-weight:800;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+
+/* ---------- Productos (mobile: tarjeta horizontal) ---------- */
+.grid{display:grid;gap:12px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:12px;display:grid;grid-template-columns:104px 1fr;gap:12px;scroll-margin-top:70px;transition:box-shadow .3s}
+.card.hl{box-shadow:0 0 0 3px var(--brand),var(--shadow)}
+.ph{width:104px;height:104px;border-radius:14px;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:2.6rem;overflow:hidden}
+.card[data-cat="Perfuminas"] .ph{background:var(--lila)}
 .ph img{width:100%;height:100%;object-fit:cover}
-.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
-.title{font-weight:600}
-.price{font-size:1.25rem;font-weight:700}
-.price small{font-size:.8rem;font-weight:400;color:var(--muted)}
-.min{font-size:.85rem;color:var(--muted)}
-label{font-size:.8rem;color:var(--muted)}
-select,input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
-.row{display:grid;grid-template-columns:1fr 90px;gap:8px}
-.btn{border:0;border-radius:10px;padding:10px 12px;font:inherit;font-weight:600;cursor:pointer;background:var(--brand);color:var(--brand-ink);margin-top:auto}
-.cartbar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 0;margin-top:24px;display:none}
-.cartbar.show{display:block}
-.cartbar .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.cartlist{font-size:.9rem;color:var(--muted);flex:1;min-width:200px}
-.cartlist button{border:0;background:none;color:var(--muted);cursor:pointer;font:inherit;text-decoration:underline;padding:0 4px}
-.wa{background:var(--wa);color:#fff;text-decoration:none;border-radius:10px;padding:12px 16px;font-weight:700;white-space:nowrap}
-footer{color:var(--muted);font-size:.85rem;text-align:center;padding:28px 0 40px}
-.msg{color:var(--muted);padding:20px 0}
+.top{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.title{font-weight:800;font-size:1.02rem;line-height:1.2}
+.pres{display:inline-block;margin-top:4px;font-size:.78rem;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:2px 8px;border-radius:999px;align-self:flex-start}
+.price{font-size:1.35rem;font-weight:800;margin-top:6px}
+.price small{font-size:.78rem;font-weight:600;color:var(--muted)}
+.min{font-size:.8rem;color:var(--muted)}
+.opts{grid-column:1/-1;display:flex;flex-direction:column;gap:10px}
+.lbl{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+.aromas{display:flex;gap:6px;flex-wrap:wrap}
+.aroma{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:.85rem;font-weight:600;cursor:pointer}
+.aroma.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+.buy{display:flex;gap:10px;align-items:center}
+.step{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:14px;overflow:hidden;flex:none}
+.step button{width:40px;height:44px;border:0;background:transparent;font-size:1.3rem;font-weight:700;cursor:pointer}
+.step button:disabled{opacity:.3}
+.step span{min-width:34px;text-align:center;font-weight:800}
+.add{flex:1;height:47px;border:0;border-radius:14px;background:var(--brand);color:var(--ink-on-brand);font-weight:800;font-size:.98rem;cursor:pointer;transition:transform .1s}
+.add:active{transform:scale(.97)}
+
+/* ---------- Pedido ---------- */
+.cart{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:0 12px calc(12px + env(safe-area-inset-bottom));transform:translateY(130%);transition:transform .3s}
+.cart.show{transform:none}
+.cart-in{max-width:620px;margin:0 auto;background:var(--card);border-radius:22px;box-shadow:0 -4px 30px rgba(0,0,0,.18);padding:12px}
+.cart-head{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;width:100%;padding:2px 4px 10px;text-align:left}
+.cart-count{background:var(--brand);color:var(--ink-on-brand);min-width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem}
+.cart-total{flex:1;font-weight:800}
+.cart-total small{display:block;font-weight:600;color:var(--muted);font-size:.78rem}
+.chev{transition:transform .2s;color:var(--muted)}
+.cart.open .chev{transform:rotate(180deg)}
+.cart-list{display:none;max-height:40vh;overflow:auto;border-top:1px solid var(--line);margin:0 4px 10px;padding-top:8px}
+.cart.open .cart-list{display:block}
+.line{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;font-size:.9rem}
+.line button{border:0;background:var(--bg);border-radius:999px;width:28px;height:28px;cursor:pointer;color:var(--muted);flex:none}
+.wa{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--wa);color:#fff;text-decoration:none;border-radius:16px;height:52px;font-weight:800;font-size:1.02rem}
+
+.toast{position:fixed;left:50%;top:16px;transform:translate(-50%,-150%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;font-size:.9rem;z-index:30;transition:transform .3s}
+.toast.show{transform:translate(-50%,0)}
+
+footer{color:var(--muted);font-size:.82rem;text-align:center;padding:26px 16px 10px}
+.msg{color:var(--muted);padding:30px 0;text-align:center}
+
+/* ---------- Pantallas grandes ---------- */
+@media (min-width:720px){
+  header{padding:40px 0 70px} header h1{font-size:2.4rem}
+  .info{grid-template-columns:repeat(4,1fr);margin-top:-44px}
+  .info .wide{grid-column:auto}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+}
 </style>
 </head>
 <body>
 <header><div class="wrap">
+  <span class="badge">✨ Venta mayorista</span>
   <h1 id="nombre">Catálogo mayorista</h1>
-  <p>Perfuminas y desodorantes de piso · venta por mayor</p>
+  <p>Perfuminas y desodorantes de piso</p>
 </div></header>
 
 <main class="wrap">
   <section class="info" id="info"></section>
   <nav class="filters" id="filters"></nav>
   <div id="catalogo"><p class="msg">Cargando productos…</p></div>
+  <footer>Precios mayoristas sujetos a disponibilidad.<br>Te confirmamos el total por WhatsApp.</footer>
 </main>
 
-<div class="cartbar" id="cartbar"><div class="wrap">
-  <div class="cartlist" id="cartlist"></div>
-  <a class="wa" id="cartsend" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+<div class="cart" id="cart"><div class="cart-in">
+  <button class="cart-head" id="carthead" aria-label="Ver pedido">
+    <span class="cart-count" id="cartcount">0</span>
+    <span class="cart-total" id="carttotal"></span>
+    <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>
+  </button>
+  <div class="cart-list" id="cartlist"></div>
+  <a class="wa" id="cartsend" target="_blank" rel="noopener">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>
+    Enviar pedido por WhatsApp
+  </a>
 </div></div>
-
-<footer class="wrap">Precios mayoristas sujetos a disponibilidad. Te confirmamos el total por WhatsApp.</footer>
+<div class="toast" id="toast">Agregado al pedido ✓</div>
 
 <script>
 /* ===== CONFIGURACIÓN =====
-   Pegá acá los links "Publicar en la Web → CSV" de cada pestaña de la Google Sheet.
+   Links "Publicar en la Web → CSV" de cada pestaña de la Google Sheet.
    Si quedan vacíos, la página muestra los datos de ejemplo de abajo. */
 const CSV_PRODUCTOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=0";
 const CSV_NEGOCIO   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=437297188";
@@ -85,7 +151,7 @@ Desodorantes de piso,Desodorante concentrado,"Pino, Marina, Lavanda",5 L,6000,2,
 const EJEMPLO_NEGOCIO = `Dato,Valor
 Nombre del emprendimiento,[Nombre]
 WhatsApp (549 + área sin 0 + número sin 15),5491100000000
-Envíos,[Envíos a CABA y GBA / retiro en ...]
+Envíos,[Envíos a CABA y GBA]
 Medios de pago,"[Transferencia, efectivo, Mercado Pago]"
 Horario de atención,[Lunes a viernes de 9 a 18]
 Cómo hacer el pedido,"Elegí aroma y cantidad, agregá al pedido y mandalo por WhatsApp"`;
@@ -114,6 +180,7 @@ async function load(url,fallback){
 }
 
 /* ===== Helpers ===== */
+const $=id=>document.getElementById(id);
 const num=s=>Number(String(s).replace(/[^\d]/g,""))||0;
 const ars=n=>"$"+n.toLocaleString("es-AR");
 /* Debe coincidir EXACTO con la fórmula de la pestaña Meta */
@@ -126,64 +193,77 @@ let WA="", cart=[];
 function render(productos, negocio){
   const get=k=>(negocio.find(d=>d.Dato.toLowerCase().startsWith(k))||{}).Valor||"";
   const nombre=get("nombre"); WA=get("whatsapp").replace(/\D/g,"");
-  if(nombre && !nombre.startsWith("[")){ document.getElementById("nombre").textContent=nombre; document.title=nombre+" · Catálogo mayorista"; }
-  document.getElementById("info").innerHTML=[["Cómo pedir",get("cómo")||get("como")],["Envíos",get("envíos")||get("envios")],["Medios de pago",get("medios")],["Horario",get("horario")]]
-    .filter(x=>x[1]).map(([t,v])=>`<div><b>${t}</b>${esc(v)}</div>`).join("");
+  if(nombre && !nombre.startsWith("[")){ $("nombre").textContent=nombre; document.title=nombre+" · Catálogo mayorista"; }
+  const info=[["🛒","Cómo pedir",get("cómo")||get("como"),"wide"],["🚚","Envíos",get("envíos")||get("envios")],["💳","Pagos",get("medios")],["🕐","Horario",get("horario"),"wide"]];
+  $("info").innerHTML=info.filter(x=>x[2]).map(([i,t,v,c])=>`<div class="${c||""}"><b>${i} ${t}</b>${esc(v)}</div>`).join("");
 
   const items=productos.filter(p=>si(p["Disponible"])&&p["Producto"]);
   const cats=[...new Set(items.map(p=>p["Categoría"]))];
-  const f=document.getElementById("filters");
-  f.innerHTML=["Todos",...cats].map((c,i)=>`<button class="chip${i?"":" on"}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+  const f=$("filters");
+  f.innerHTML=["Todos",...cats].map((c,i)=>`<button class="chip${i?"":" on"}" data-c="${esc(c)}">${i?(EMOJI[c]||"🧴")+" ":""}${esc(c)}</button>`).join("");
   f.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;
     f.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));
-    document.querySelectorAll("[data-cat]").forEach(s=>s.hidden=!(b.dataset.c==="Todos"||s.dataset.cat===b.dataset.c));};
+    document.querySelectorAll("section[data-cat]").forEach(s=>s.hidden=!(b.dataset.c==="Todos"||s.dataset.cat===b.dataset.c));};
 
-  document.getElementById("catalogo").innerHTML = items.length ? cats.map(cat=>`
+  $("catalogo").innerHTML = items.length ? cats.map(cat=>`
     <section data-cat="${esc(cat)}"><h2>${EMOJI[cat]||"🧴"} ${esc(cat)}</h2><div class="grid">
     ${items.filter(p=>p["Categoría"]===cat).map(p=>{
       const id=slug(p["Producto"]+" "+p["Presentación"]); const min=num(p["Mínimo"])||1;
       const aromas=p["Aromas"].split(",").map(a=>a.trim()).filter(Boolean);
-      return `<article class="card" id="${id}">
+      return `<article class="card" id="${id}" data-cat="${esc(cat)}" data-n="${esc(p["Producto"]+" "+p["Presentación"])}" data-p="${num(p["Precio"])}" data-min="${min}" data-q="${min}" data-aroma="${aromas.length===1?esc(aromas[0]):""}">
         <div class="ph" data-e="${EMOJI[cat]||"🧴"}"><img src="fotos/${id}.jpg" alt="${esc(p["Producto"])}" loading="lazy" onerror="this.parentNode.textContent=this.parentNode.dataset.e"></div>
-        <div class="body">
-          <div class="title">${esc(p["Producto"])} · ${esc(p["Presentación"])}</div>
+        <div class="top">
+          <div class="title">${esc(p["Producto"])}</div>
+          <span class="pres">${esc(p["Presentación"])}</span>
           <div class="price">${ars(num(p["Precio"]))} <small>c/u</small></div>
           <div class="min">Mínimo ${min} unidades</div>
-          <div class="row">
-            <div><label>Aroma</label><select>${aromas.length?aromas.map(a=>`<option>${esc(a)}</option>`).join(""):"<option>Único</option>"}</select></div>
-            <div><label>Cantidad</label><input type="number" min="${min}" step="1" value="${min}"></div>
+        </div>
+        <div class="opts">
+          ${aromas.length>1?`<div><div class="lbl">Aroma</div><div class="aromas">${aromas.map((a,i)=>`<button class="aroma${i?"":" on"}">${esc(a)}</button>`).join("")}</div></div>`:""}
+          <div class="buy">
+            <div class="step"><button class="minus" aria-label="Menos" disabled>−</button><span class="qty">${min}</span><button class="plus" aria-label="Más">+</button></div>
+            <button class="add">Agregar</button>
           </div>
-          <button class="btn" data-n="${esc(p["Producto"]+" "+p["Presentación"])}" data-p="${num(p["Precio"])}" data-min="${min}">Agregar al pedido</button>
         </div></article>`;}).join("")}
     </div></section>`).join("") : `<p class="msg">No hay productos disponibles por ahora.</p>`;
 
   const want=new URLSearchParams(location.search).get("p")||location.hash.slice(1);
-  const el=want&&document.getElementById(want); if(el){el.classList.add("hl");el.scrollIntoView({block:"center"});}
+  const el=want&&document.getElementById(want); if(el){el.classList.add("hl");setTimeout(()=>el.scrollIntoView({block:"center"}),200);}
 
-  document.getElementById("catalogo").onclick=e=>{
-    const b=e.target.closest(".btn"); if(!b) return;
-    const card=b.closest(".card"); const aroma=card.querySelector("select").value;
-    const qty=Math.max(num(card.querySelector("input").value), Number(b.dataset.min));
-    card.querySelector("input").value=qty;
-    const ex=cart.find(c=>c.n===b.dataset.n&&c.a===aroma);
-    ex?ex.q+=qty:cart.push({n:b.dataset.n,a:aroma,q:qty,p:Number(b.dataset.p)});
-    b.textContent="✓ Agregado"; setTimeout(()=>b.textContent="Agregar al pedido",1200);
-    drawCart();
+  $("catalogo").onclick=e=>{
+    const card=e.target.closest(".card"); if(!card) return;
+    const min=Number(card.dataset.min); let q=Number(card.dataset.q);
+    if(e.target.closest(".aroma")){ card.querySelectorAll(".aroma").forEach(a=>a.classList.toggle("on",a===e.target.closest(".aroma"))); return; }
+    if(e.target.closest(".plus")) q++;
+    else if(e.target.closest(".minus")) q=Math.max(min,q-1);
+    else if(e.target.closest(".add")){
+      const a=card.querySelector(".aroma.on");
+      const aroma=a?a.textContent:(card.dataset.aroma||"");
+      const ex=cart.find(c=>c.n===card.dataset.n&&c.a===aroma);
+      ex?ex.q+=q:cart.push({n:card.dataset.n,a:aroma,q,p:Number(card.dataset.p)});
+      toast(); drawCart(); return;
+    } else return;
+    card.dataset.q=q; card.querySelector(".qty").textContent=q; card.querySelector(".minus").disabled=q<=min;
   };
 }
 
+let tt; function toast(){ const t=$("toast"); t.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"),1300); }
+
 function drawCart(){
-  const bar=document.getElementById("cartbar"); bar.classList.toggle("show",cart.length>0);
-  const total=cart.reduce((s,c)=>s+c.q*c.p,0);
-  document.getElementById("cartlist").innerHTML=cart.map((c,i)=>`${c.q} × ${esc(c.n)} (${esc(c.a)}) <button data-i="${i}" aria-label="Quitar">quitar</button>`).join("<br>")+`<br><b>Total estimado: ${ars(total)}</b>`;
-  const txt="¡Hola! Quiero hacer este pedido:\n"+cart.map(c=>`• ${c.q} × ${c.n} – ${c.a}`).join("\n")+`\n\nTotal estimado: ${ars(total)}`;
-  document.getElementById("cartsend").href=`https://wa.me/${WA}?text=${encodeURIComponent(txt)}`;
+  $("cart").classList.toggle("show",cart.length>0); if(!cart.length) $("cart").classList.remove("open");
+  const total=cart.reduce((s,c)=>s+c.q*c.p,0), units=cart.reduce((s,c)=>s+c.q,0);
+  $("cartcount").textContent=cart.length;
+  $("carttotal").innerHTML=`${ars(total)}<small>${units} unidades · tocá para ver el pedido</small>`;
+  $("cartlist").innerHTML=cart.map((c,i)=>`<div class="line"><span><b>${c.q} ×</b> ${esc(c.n)}${c.a?` · ${esc(c.a)}`:""}</span><button data-i="${i}" aria-label="Quitar">✕</button></div>`).join("");
+  const txt="¡Hola! Quiero hacer este pedido:\n"+cart.map(c=>`• ${c.q} × ${c.n}${c.a?` – ${c.a}`:""}`).join("\n")+`\n\nTotal estimado: ${ars(total)}`;
+  $("cartsend").href=`https://wa.me/${WA}?text=${encodeURIComponent(txt)}`;
 }
-document.getElementById("cartlist").onclick=e=>{const b=e.target.closest("button[data-i]");if(b){cart.splice(Number(b.dataset.i),1);drawCart();}};
+$("carthead").onclick=()=>$("cart").classList.toggle("open");
+$("cartlist").onclick=e=>{const b=e.target.closest("button[data-i]");if(b){cart.splice(Number(b.dataset.i),1);drawCart();}};
 
 Promise.all([load(CSV_PRODUCTOS,EJEMPLO_PRODUCTOS),load(CSV_NEGOCIO,EJEMPLO_NEGOCIO)])
   .then(([p,n])=>render(p,n))
-  .catch(()=>{document.getElementById("catalogo").innerHTML='<p class="msg">No se pudo cargar el catálogo. Escribinos por WhatsApp.</p>';});
+  .catch(()=>{$("catalogo").innerHTML='<p class="msg">No se pudo cargar el catálogo. Escribinos por WhatsApp.</p>';});
 </script>
 </body>
 </html>
