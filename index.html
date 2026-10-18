@@ -140,14 +140,21 @@ footer{color:var(--muted);font-size:.82rem;text-align:center;padding:26px 16px 1
 /* ===== CONFIGURACIÓN =====
    Links "Publicar en la Web → CSV" de cada pestaña de la Google Sheet.
    Si quedan vacíos, la página muestra los datos de ejemplo de abajo. */
-const CSV_PRODUCTOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=0";
-const CSV_NEGOCIO   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=437297188";
+const CSV_PRECIOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=428726744";
+const CSV_STOCK   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=1210928530";
+const CSV_NEGOCIO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZDSBsNSWQNPp6tPWkCs878pI_UW7yBFqwsfAHMNenV2xYwdoOe6M1XahLqJxVtASo1pic2mg0DPGC/pub?single=true&output=csv&gid=437297188";
 
-const EJEMPLO_PRODUCTOS = `Categoría,Producto,Aromas,Presentación,Precio,Mínimo,Disponible
-Perfuminas,Perfumina textil,"Lavanda, Bebé, Floral",500 ml,2500,6,Sí
-Perfuminas,Perfumina textil,"Lavanda, Bebé, Floral",1 L,4200,6,Sí
-Desodorantes de piso,Desodorante concentrado,"Pino, Marina, Lavanda",1 L,1800,6,Sí
-Desodorantes de piso,Desodorante concentrado,"Pino, Marina, Lavanda",5 L,6000,2,No`;
+const EJEMPLO_PRECIOS = `Categoría,Producto,Presentación,Precio,Mínimo
+Perfuminas,Perfumina textil,500 ml,2500,6
+Perfuminas,Perfumina textil,1 L,4200,6
+Desodorantes de piso,Desodorante concentrado,1 L,1800,6`;
+const EJEMPLO_STOCK = `Producto,Aroma,Hay stock
+Perfumina textil 500 ml,Lavanda,TRUE
+Perfumina textil 500 ml,Bebé,TRUE
+Perfumina textil 500 ml,Floral,FALSE
+Perfumina textil 1 L,Lavanda,TRUE
+Desodorante concentrado 1 L,Pino,TRUE
+Desodorante concentrado 1 L,Marina,TRUE`;
 const EJEMPLO_NEGOCIO = `Dato,Valor
 Nombre del emprendimiento,[Nombre]
 WhatsApp (549 + área sin 0 + número sin 15),5491100000000
@@ -191,14 +198,22 @@ const si=s=>/^(s|x|1|true|verdadero|✓|✔)/i.test(String(s).trim());
 
 let WA="", cart=[];
 
-function render(productos, negocio){
+function render(precios, stock, negocio){
   const get=k=>(negocio.find(d=>d.Dato.toLowerCase().startsWith(k))||{}).Valor||"";
   const nombre=get("nombre"); WA=get("whatsapp").replace(/\D/g,"");
   if(nombre && !nombre.startsWith("[")){ $("nombre").textContent=nombre; document.title=nombre+" · Catálogo mayorista"; }
   const info=[["🛒","Cómo pedir",get("cómo")||get("como"),"wide"],["🚚","Envíos",get("envíos")||get("envios")],["💳","Pagos",get("medios")],["🕐","Horario",get("horario"),"wide"]];
   $("info").innerHTML=info.filter(x=>x[2]).map(([i,t,v,c])=>`<div class="${c||""}"><b>${i} ${t}</b>${esc(v)}</div>`).join("");
 
-  const items=productos.filter(p=>si(p["Disponible"])&&p["Producto"]);
+  /* Une Precios (1 fila por producto+presentación) con Stock (1 fila por aroma).
+     Solo se muestran los aromas tildados; un producto sin ningún aroma tildado no aparece. */
+  const norm=t=>String(t||"").trim().toLowerCase().replace(/\s+/g," ");
+  const items=precios.filter(p=>p["Producto"]).map(p=>{
+    const nombre=(p["Nombre (automático)"]||(p["Producto"]+" "+p["Presentación"])).trim();
+    const filas=stock.filter(r=>norm(r["Producto"])===norm(nombre));
+    const aromas=filas.filter(r=>si(r["Hay stock"])).map(r=>(r["Aroma"]||"").trim());
+    return {...p, nombre, aromas, ok:aromas.length>0};
+  }).filter(p=>p.ok);
   const cats=[...new Set(items.map(p=>p["Categoría"]))];
   const f=$("filters");
   f.innerHTML=["Todos",...cats].map((c,i)=>`<button class="chip${i?"":" on"}" data-c="${esc(c)}">${i?(EMOJI[c]||"🧴")+" ":""}${esc(c)}</button>`).join("");
@@ -210,7 +225,7 @@ function render(productos, negocio){
     <section data-cat="${esc(cat)}"><h2>${EMOJI[cat]||"🧴"} ${esc(cat)}</h2><div class="grid">
     ${items.filter(p=>p["Categoría"]===cat).map(p=>{
       const id=slug(p["Producto"]+" "+p["Presentación"]); const min=num(p["Mínimo"])||1;
-      const aromas=p["Aromas"].split(",").map(a=>a.trim()).filter(Boolean);
+      const aromas=p.aromas.filter(Boolean);
       return `<article class="card" id="${id}" data-cat="${esc(cat)}" data-n="${esc(p["Producto"]+" "+p["Presentación"])}" data-p="${num(p["Precio"])}" data-min="${min}" data-q="${min}" data-aroma="${aromas.length===1?esc(aromas[0]):""}">
         <div class="ph" data-e="${EMOJI[cat]||"🧴"}"><img src="fotos/${id}.jpg" alt="${esc(p["Producto"])}" loading="lazy" onerror="this.parentNode.textContent=this.parentNode.dataset.e"></div>
         <div class="top">
@@ -220,7 +235,7 @@ function render(productos, negocio){
           <div class="min">Mínimo ${min} unidades</div>
         </div>
         <div class="opts">
-          ${aromas.length>1?`<div><div class="lbl">Aroma</div><div class="aromas">${aromas.map((a,i)=>`<button class="aroma${i?"":" on"}">${esc(a)}</button>`).join("")}</div></div>`:""}
+          ${aromas.length?`<div><div class="lbl">Aroma</div><div class="aromas">${aromas.map((a,i)=>`<button class="aroma${i?"":" on"}">${esc(a)}</button>`).join("")}</div></div>`:""}
           <div class="buy">
             <div class="step"><button class="minus" aria-label="Menos" disabled>−</button><span class="qty">${min}</span><button class="plus" aria-label="Más">+</button></div>
             <button class="add">Agregar</button>
@@ -262,8 +277,8 @@ function drawCart(){
 $("carthead").onclick=()=>$("cart").classList.toggle("open");
 $("cartlist").onclick=e=>{const b=e.target.closest("button[data-i]");if(b){cart.splice(Number(b.dataset.i),1);drawCart();}};
 
-Promise.all([load(CSV_PRODUCTOS,EJEMPLO_PRODUCTOS),load(CSV_NEGOCIO,EJEMPLO_NEGOCIO)])
-  .then(([p,n])=>render(p,n))
+Promise.all([load(CSV_PRECIOS,EJEMPLO_PRECIOS),load(CSV_STOCK,EJEMPLO_STOCK),load(CSV_NEGOCIO,EJEMPLO_NEGOCIO)])
+  .then(([p,st,n])=>render(p,st,n))
   .catch(()=>{$("catalogo").innerHTML='<p class="msg">No se pudo cargar el catálogo. Escribinos por WhatsApp.</p>';});
 </script>
 </body>
