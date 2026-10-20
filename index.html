@@ -227,7 +227,7 @@ function render(precios, stock, negocio){
       const id=slug(p["Producto"]+" "+p["Presentación"]); const min=num(p["Mínimo"])||1;
       const aromas=p.aromas.filter(Boolean);
       return `<article class="card" id="${id}" data-cat="${esc(cat)}" data-n="${esc(p["Producto"]+" "+p["Presentación"])}" data-p="${num(p["Precio"])}" data-min="${min}" data-q="${min}" data-aroma="${aromas.length===1?esc(aromas[0]):""}">
-        <div class="ph" data-e="${EMOJI[cat]||"🧴"}"><img src="fotos/${id}.jpg" alt="${esc(p["Producto"])}" loading="lazy" onerror="this.parentNode.textContent=this.parentNode.dataset.e"></div>
+        <div class="ph" data-e="${EMOJI[cat]||"🧴"}"><img src="${esc(p["Foto directa (automático)"]||`fotos/${id}.jpg`)}" referrerpolicy="no-referrer" alt="${esc(p["Producto"])}" loading="lazy" onerror="this.parentNode.textContent=this.parentNode.dataset.e"></div>
         <div class="top">
           <div class="title">${esc(p["Producto"])}</div>
           <span class="pres">${esc(p["Presentación"])}</span>
